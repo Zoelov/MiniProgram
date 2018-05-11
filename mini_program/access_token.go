@@ -18,6 +18,7 @@ type MiniProgramAccessToken struct {
 }
 
 // GetMiniProgramAccessToken -- get token
+// access token 是有有效时间的，所以并不需要每次都获取，所以根据自己的业务逻辑可以将token缓存起来
 func GetMiniProgramAccessToken(config MiniProgramConfig) (string, int64, error) {
 	appID := config.AppID()
 	appSecret := config.AppSecret()
