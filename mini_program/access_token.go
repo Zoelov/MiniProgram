@@ -7,11 +7,13 @@ import (
 	"miniprogram/utils"
 )
 
+// WechatAccessTokenData -- token json data
 type WechatAccessTokenData struct {
 	AccessToken string `json:"access_token"`
 	ExpiresIn   int64  `json:"expires_in"`
 }
 
+// MiniProgramAccessToken -- with error
 type MiniProgramAccessToken struct {
 	WechatError
 	WechatAccessTokenData
