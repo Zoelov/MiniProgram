@@ -10,6 +10,18 @@ import (
 	"github.com/garyburd/redigo/redis"
 )
 
+const (
+	HALF_MINUTE = 30
+	ONE_MINUTE  = 60
+	HALF_HOUR   = 1800
+	ONE_HOUR    = 3600
+	HALF_DAY    = ONE_HOUR * 12
+	ONE_DAY     = ONE_HOUR * 24
+	ONE_WEEK    = ONE_DAY * 7
+	ONE_MONTH   = ONE_DAY * 30
+	ONE_YEAR    = ONE_DAY * 365
+)
+
 var CachePrefix = "minicache-"
 
 var CacheStore = RedisConn{Prefix: CachePrefix}
@@ -98,6 +110,22 @@ func (rc *RedisConn) GetCacheStruct(key string, dest interface{}) error {
 
 func (rc *RedisConn) Expire(key string, seconds int64) (bool, error) {
 	r, err := redis.Bool(rc.do("EXPIRE", rc.keyWithPrefix(key), seconds))
+	return r, err
+}
+
+func (rc *RedisConn) Delete(key string) (int, error) {
+	var err error
+
+	r, err := redis.Int(rc.do("DEL", rc.keyWithPrefix(key)))
+	if err != nil {
+		return 0, err
+	}
+
+	return r, err
+}
+
+func (rc *RedisConn) TTL(key string) (int64, error) {
+	r, err := redis.Int64(rc.do("TTL", rc.keyWithPrefix(key)))
 	return r, err
 }
 
