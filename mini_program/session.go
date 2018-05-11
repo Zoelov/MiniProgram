@@ -1,17 +1,15 @@
-package mini_program
+// mini program code to session
+// cache session in redis
+// return a uuid as key instead of session info
 
-/*
-	mini program code to session
-	cache session in redis
-	return a uuid as key instead of session info
-*/
+package mini_program
 
 import (
 	"encoding/json"
 	"fmt"
+
 	"miniprogram/utils"
 
-	"github.com/Zoelov/wechat/util"
 	uuid "github.com/satori/go.uuid"
 )
 
@@ -32,7 +30,7 @@ type MiniProgramSession struct {
 func GetMiniProgramSessionInfo(code, appID, appSecret string) (*MiniProgramSession, error) {
 	url := fmt.Sprintf(sessionURL, appID, appSecret, code)
 	var response []byte
-	response, err := util.HTTPGet(url)
+	response, err := utils.HTTPGet(url)
 	if err != nil {
 		return nil, err
 	}
