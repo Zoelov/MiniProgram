@@ -20,8 +20,8 @@ type MiniProgramQRCodeParam struct {
 }
 
 // GetMiniProgramQRCode -- 获取永久小程序码
-func GetMiniProgramQRCode(param *MiniProgramQRCodeParam, config MiniProgramConfig) ([]byte, error) {
-	token, _, err := GetMiniProgramAccessToken(config)
+func GetMiniProgramQRCode(param *MiniProgramQRCodeParam, appID, appSecret string) ([]byte, error) {
+	token, _, err := GetMiniProgramAccessToken(appID, appSecret, true)
 	if err != nil {
 		return nil, err
 	}

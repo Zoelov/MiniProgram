@@ -7,6 +7,15 @@ import (
 	"miniprogram/utils"
 )
 
+const (
+	cacheKeyForAccessTokenByAppID = "mini:program:appID:%v:access:token:v1"
+)
+
+type WechatError struct {
+	Errcode int64  `json:"errcode"`
+	Errmsg  string `json:"errmsg"`
+}
+
 // WechatAccessTokenData -- token json data
 type WechatAccessTokenData struct {
 	AccessToken string `json:"access_token"`
@@ -19,11 +28,18 @@ type MiniProgramAccessToken struct {
 	WechatAccessTokenData
 }
 
-// GetMiniProgramAccessToken -- get token
-// access token 是有有效时间的，所以并不需要每次都获取，所以根据自己的业务逻辑可以将token缓存起来
-func GetMiniProgramAccessToken(config MiniProgramConfig) (string, int64, error) {
-	appID := config.AppID()
-	appSecret := config.AppSecret()
+// GetMiniProgramAccessToken -- get token and cache
+func GetMiniProgramAccessToken(appID, appSecret string, cached bool) (string, int64, error) {
+	mc := utils.CacheStore
+	key := fmt.Sprintf(cacheKeyForAccessTokenByAppID, appID)
+	if cached {
+		if token, err := mc.GetString(key); err == nil {
+			expired, err := mc.TTL(key)
+			if err == nil {
+				return token, expired, nil
+			}
+		}
+	}
 
 	url := fmt.Sprintf(accessTokenURL, appID, appSecret)
 	var response []byte
@@ -37,8 +53,12 @@ func GetMiniProgramAccessToken(config MiniProgramConfig) (string, int64, error) 
 		return "", 0, err
 	}
 	if result.Errcode != 0 {
-		err := fmt.Errorf("GetMiniProgramSessionInfo error: errcode=%v, errmsg=%v", result.Errcode, result.Errmsg)
+		err := fmt.Errorf("get access token error: errcode=%v, errmsg=%v", result.Errcode, result.Errmsg)
 		return "", 0, err
+	}
+
+	if cached {
+		mc.Set(key, result.AccessToken, result.ExpiresIn)
 	}
 
 	return result.AccessToken, result.ExpiresIn, nil
